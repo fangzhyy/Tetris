@@ -284,3 +284,5 @@ $RECYCLE.BIN/
 *.obj
 *.idb
 *.exp
+*.tlog
+Debug.win32/
