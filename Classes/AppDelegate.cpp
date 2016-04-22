@@ -1,5 +1,5 @@
 #include "AppDelegate.h"
-#include "HelloWorldScene.h"
+#include "TetrisScene.h"
 
 USING_NS_CC;
 
@@ -32,17 +32,15 @@ bool AppDelegate::applicationDidFinishLaunching() {
     }
 
     director->getOpenGLView()->setDesignResolutionSize(960, 640, ResolutionPolicy::SHOW_ALL);
-
     // turn on display FPS
     director->setDisplayStats(true);
-
     // set FPS. the default value is 1.0/60 if you don't call this
     director->setAnimationInterval(1.0 / 60);
-
+	
     FileUtils::getInstance()->addSearchPath("res");
 
     // create a scene. it's an autorelease object
-    auto scene = HelloWorld::createScene();
+	auto scene = TetrisScene::createScene();
 
     // run
     director->runWithScene(scene);
