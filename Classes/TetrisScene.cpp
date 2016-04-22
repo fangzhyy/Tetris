@@ -1,6 +1,7 @@
 #include "TetrisScene.h"
 #include "cocostudio/CocoStudio.h"
 #include "ui/CocosGUI.h"
+#include "TetrisGameAreaLayer.h"
 
 Scene* TetrisScene::createScene()
 {
@@ -9,10 +10,10 @@ Scene* TetrisScene::createScene()
 
 	// 'layer' is an autorelease object
 	auto layer = TetrisScene::create();
-
+	auto gameArealayer = TetrisGameAreaLayer::create();
 	// add layer as a child to scene
 	scene->addChild(layer);
-
+	layer->addChild(gameArealayer);
 	// return the scene
 	return scene;
 }
@@ -25,9 +26,9 @@ bool TetrisScene::init() {
 	Size visibleSize = director->getVisibleSize();
 	Vec2 origin = director->getVisibleOrigin();
 	mBlockL->setPosition(Vec2(visibleSize.width / 2 + origin.x, visibleSize.height + origin.y - mBlockL->getContentSize().height/2));
+	setColor(Color3B(100, 100, 100));
 	addChild(mBlockL);
 	auto ma = MoveTo::create(1, Vec3(visibleSize.width / 2 + origin.x, mBlockL->getContentSize().height / 2, 0));
-	mBlockL->runAction(ma);
-	mBlockL->release();
+//	mBlockL->runAction(ma);
 	return true;
 }
