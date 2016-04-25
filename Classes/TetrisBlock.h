@@ -5,25 +5,26 @@
 
 USING_NS_CC;
 
-class TetrisBlock : public cocos2d::Ref
+class TetrisBlock : public Node
 {
 private:
 	TetrisBlock() : mBlockWidthForCurrentRes(0), mBlockSprite(nullptr){};
 	bool init();
 public:
-	static TetrisBlock* createRandomBlock();
-	virtual std::vector<unsigned int> getTopOffsets();
-	virtual std::vector<unsigned int> getBottomOffsets();
+	static TetrisBlock* createBlockByStruct(const byte structNumber, RefPtr<Sprite> unitSprite, float scaleRatio);
+	//virtual std::vector<unsigned int> getTopOffsets();
+	//virtual std::vector<unsigned int> getBottomOffsets();
+
+	CREATE_FUNC(TetrisBlock);
 private:
 	cocos2d::Sprite* mBlockSprite;
 	unsigned int mBlockWidthForCurrentRes;
-    static const int sSquareStruct = 0b1100110000000000;
-    static  const int sLStruct = 0b1110100000000000;
-    static const int sNLStruct =  0b1110001000000000;
-    static const int sTStruct = 0b0100111000000000;
-    static  const int sZStruct = 0b1100011000000000;
-    static const int sNZStruct = 0b0110110000000000;
-    static const int sStickStruct = 0b1111000000000000;
+    //static  const int sLStruct = 0xe8;
+    //static const int sNLStruct =  0xe2;
+    //static const int sTStruct = 0x4e;
+    //static  const int sZStruct = 0xc6;
+    //static const int sNZStruct = 0x6c;
+    //static const int sStickStruct = 0xf0;
 };
 
 
