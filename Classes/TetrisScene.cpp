@@ -28,7 +28,6 @@ bool TetrisScene::init() {
 	mBlockL->setPosition(Vec2(visibleSize.width / 2 + origin.x, visibleSize.height + origin.y - mBlockL->getContentSize().height/2));
 	setColor(Color3B(100, 100, 100));
 	addChild(mBlockL);
-	auto ma = MoveTo::create(1, Vec3(visibleSize.width / 2 + origin.x, mBlockL->getContentSize().height / 2, 0));
 //	mBlockL->runAction(ma);
 	return true;
 }
