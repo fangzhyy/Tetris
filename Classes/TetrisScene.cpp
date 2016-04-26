@@ -21,13 +21,6 @@ Scene* TetrisScene::createScene()
 
 
 bool TetrisScene::init() {
-	mBlockL = Sprite::create("L.png");
-	auto director = Director::getInstance();
-	Size visibleSize = director->getVisibleSize();
-	Vec2 origin = director->getVisibleOrigin();
-	mBlockL->setPosition(Vec2(visibleSize.width / 2 + origin.x, visibleSize.height + origin.y - mBlockL->getContentSize().height/2));
-	setColor(Color3B(100, 100, 100));
-	addChild(mBlockL);
-//	mBlockL->runAction(ma);
+	
 	return true;
 }

@@ -149,6 +149,7 @@ xcopy /Y /Q "$(COCOS_X_ROOT)\cocos2d-x-3.10\prebuilt\win32\*.*" "$(OutDir)"
     <ClCompile Include="..\Classes\AppDelegate.cpp" />
     <ClCompile Include="..\Classes\HelloWorldScene.cpp" />
     <ClCompile Include="..\Classes\TetrisBlock.cpp" />
+    <ClCompile Include="..\Classes\TetrisController.cpp" />
     <ClCompile Include="..\Classes\TetrisGameAreaLayer.cpp" />
     <ClCompile Include="..\Classes\TetrisManager.cpp" />
     <ClCompile Include="..\Classes\TetrisScene.cpp" />
@@ -158,6 +159,7 @@ xcopy /Y /Q "$(COCOS_X_ROOT)\cocos2d-x-3.10\prebuilt\win32\*.*" "$(OutDir)"
     <ClInclude Include="..\Classes\AppDelegate.h" />
     <ClInclude Include="..\Classes\HelloWorldScene.h" />
     <ClInclude Include="..\Classes\TetrisBlock.h" />
+    <ClInclude Include="..\Classes\TetrisController.h" />
     <ClInclude Include="..\Classes\TetrisGameAreaLayer.h" />
     <ClInclude Include="..\Classes\TetrisManager.h" />
     <ClInclude Include="..\Classes\TetrisScene.h" />

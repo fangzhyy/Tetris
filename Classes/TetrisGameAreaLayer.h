@@ -5,6 +5,8 @@
 
 USING_NS_CC;
 
+class TetrisBlock;
+
 class TetrisGameAreaLayer : public LayerColor {
 private:
 	bool init();
@@ -12,13 +14,16 @@ private:
 	static const int KWBorder = 5;
 	static const int KBlockType = 7;
 	static const float KAreaHRationInVisible;
-    void makeCustomBlock();
+	TetrisBlock* makeCustomBlock();
 	void initBlockRectSprite();
     RefPtr<TextureCache> mTexCache;
 	Vector<RefPtr<Sprite> > mBlockUnitSprite;
 	static const byte sSquareStructs[];
 	float mScalRatio;
+	float mGridSize;
 	void renderTest();
+	void dropNewBlock();
+	void onKeyReleased(EventKeyboard::KeyCode keyCode, Event* unused_event);
 public:
 	CREATE_FUNC(TetrisGameAreaLayer);
 };

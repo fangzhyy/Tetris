@@ -2,11 +2,15 @@
 #include "TetrisBlock.h"
 
 const float TetrisGameAreaLayer::KAreaHRationInVisible = 0.9;
-const byte TetrisGameAreaLayer::sSquareStructs[] = { 0xcc, 0xe8, 0xe2, 0x4e, 0xc6, 0x6c, 0xf0 };
+const byte TetrisGameAreaLayer::sSquareStructs[] = { 0xcc, 0xe8, 0xe2, 0xe4, 0xc6, 0x6c, 0xf0 };
 
 bool TetrisGameAreaLayer::init()
 {
 	LayerColor::initWithColor(Color4B(255, 255, 255, 255));
+	auto keyListener = EventListenerKeyboard::create();
+	keyListener->setEnabled(true);
+	keyListener->onKeyReleased = std::bind(&TetrisGameAreaLayer::onKeyReleased, this, std::placeholders::_1,std::placeholders::_2);
+	_eventDispatcher->addEventListenerWithSceneGraphPriority(keyListener, this);
 	auto dtor = Director::getInstance();
 	Size  vSize = dtor->getVisibleSize();
 	Vec2 org = dtor->getVisibleOrigin();
@@ -17,8 +21,17 @@ bool TetrisGameAreaLayer::init()
 	setAnchorPoint(Vec2(0 ,0));
 	setPosition(vlb);
 	initBlockRectSprite();
-	renderTest();
+	//renderTest();
 	return true;
+}
+
+void TetrisGameAreaLayer::onKeyReleased(EventKeyboard::KeyCode keyCode, Event* unused_event)
+{
+	if (keyCode == EventKeyboard::KeyCode::KEY_SPACE) {
+		int i = 0;
+		i++;
+
+	}
 }
 
 void TetrisGameAreaLayer::initBlockRectSprite() {
@@ -28,9 +41,9 @@ void TetrisGameAreaLayer::initBlockRectSprite() {
         mTexCache = new TextureCache();
     auto tex = mTexCache->addImage("rect.png");
     float miniBlockSize = tex->getContentSize().height;
-	float xx = tex->getContentSize().width;
     float areaWidth = getContentSize().width;
     float desiredBlockWidth = areaWidth / 10.0f;
+	mGridSize = desiredBlockWidth;
 	mScalRatio = desiredBlockWidth / miniBlockSize;
     Rect r;
     int testPos = 0;
@@ -52,17 +65,27 @@ void TetrisGameAreaLayer::initBlockRectSprite() {
   //     testPos += 50;
 		//testNode->addChild(miniSprite);
     }
-	//testNode->setRotation(30);
-	//makeCustomBlock();
+	dropNewBlock();
 }
 
-void TetrisGameAreaLayer::makeCustomBlock()
+TetrisBlock* TetrisGameAreaLayer::makeCustomBlock()
 {
-	auto block = TetrisBlock::createBlockByStruct(sSquareStructs[3], mBlockUnitSprite.at(3), mScalRatio);
-	block->setPosition(150, 150);
-
-	addChild(block);
+	int randomIndex = RandomHelper::random_int(0, KBlockType);
+	auto block = TetrisBlock::createBlockByStruct(sSquareStructs[randomIndex], mBlockUnitSprite.at(randomIndex), mScalRatio);
+	return block;
 }
+
+void TetrisGameAreaLayer::dropNewBlock()
+{
+	auto newBlock = makeCustomBlock();
+	Size s = newBlock->getContentSize();
+	Size layerSize = getContentSize();
+	newBlock->setPosition(Vec2(layerSize.width/2, layerSize.height));
+	addChild(newBlock);
+	auto move = MoveBy::create(1, Vec2(0,-1 * mGridSize));
+	newBlock->runAction(move);
+}
+
 
 void TetrisGameAreaLayer::renderTest()
 {

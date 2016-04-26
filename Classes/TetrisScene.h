@@ -15,16 +15,6 @@ public:
 	virtual bool init();
 	// implement the "static create()" method manually
 	CREATE_FUNC(TetrisScene);
-
-private:
-	Sprite* mBlockSquare;
-	Sprite* mBlockZ;
-	Sprite* mBlockRZ;
-	Sprite* mBlockL;
-	Sprite* mBlockRL;
-	Sprite* mBlockUpRight;
-	Sprite* mBlockT;
-
 };
 
 #endif
