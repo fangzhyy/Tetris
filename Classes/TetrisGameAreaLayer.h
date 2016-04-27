@@ -24,7 +24,11 @@ private:
 	void renderTest();
 	void dropNewBlock();
 	void onKeyReleased(EventKeyboard::KeyCode keyCode, Event* unused_event);
+	TetrisBlock* mActiveBlock;
+	void onBlockUpdate(float delta);
 public:
+	TetrisGameAreaLayer() : mActiveBlock(nullptr){};
+
 	CREATE_FUNC(TetrisGameAreaLayer);
 };
 
