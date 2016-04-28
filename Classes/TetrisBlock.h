@@ -8,18 +8,25 @@ USING_NS_CC;
 class TetrisBlock : public Node
 {
 private:
-	TetrisBlock() : mBlockSprite(nullptr){};
+	TetrisBlock() : mBlockSprite(nullptr), mStateIndex(0), mBlockLineCount(0), mBlockColCount(0){};
 	bool init();
 public:
-	static TetrisBlock* createBlockByStruct(const byte structNumber, RefPtr<Sprite> unitSprite, float scaleRatio);
+	static TetrisBlock* createBlockByStruct(std::vector<unsigned short> structs, RefPtr<Sprite> unitSprite, float scaleRatio);
 	CREATE_FUNC(TetrisBlock);
+	void rotate();
+	int getBlockColCount(){
+		return mBlockColCount;
+	}
+	std::map<int, int> getTopOffsets();
 private:
-	byte mStruct;
-	void setStruct(byte s){
-		mStruct = s;
+	std::vector<unsigned short> mStructs;
+	int mStateIndex;
+	void setStruct(std::vector<unsigned short> s){
+		mStructs = s;
 	}
 	void setSpriteByStruct();
-
+	int mBlockLineCount;
+	int mBlockColCount;
 private:
 	Sprite* mBlockSprite;
 };
