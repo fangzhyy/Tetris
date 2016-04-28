@@ -148,8 +148,14 @@ bool TetrisGameAreaLayer::blockReachBottom()
 	bool ret = mActiveBlock->getPositionY() <= 0;
 	if (ret) {
 		//update topOffsets
+		int basePosX = mActiveBlock->getPositionX();
+		int basePosY = mActiveBlock->getPositionY();
 		std::map<int, int> blockTopOffsetMap = mActiveBlock->getTopOffsets();
-
+		for (auto& kv : blockTopOffsetMap) {
+			int posX = kv.first + basePosX;
+			int gridIndex = posX / mGridSize;
+			mTopOffsets[gridIndex] = kv.second;
+		}
 	}
 	return ret;
 }
