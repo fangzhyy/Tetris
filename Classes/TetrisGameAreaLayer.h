@@ -15,7 +15,7 @@ private:
 	static const int KBlockType = 7;
 	static const float KAreaHRationInVisible;
 	static const int mGrindCol = 10;
-	int mTopOffsets[mGrindCol];
+	byte mGridInfo[mGrindCol][mGrindCol * 2];
 	TetrisBlock* makeCustomBlock();
 	void initBlockRectSprite();
     RefPtr<TextureCache> mTexCache;
@@ -32,7 +32,7 @@ private:
 	
 public:
 	TetrisGameAreaLayer() : mActiveBlock(nullptr){
-		memset(mTopOffsets, 0, sizeof(mTopOffsets));
+		memset(mGridInfo, 0, sizeof(mGrindCol));
 	};
 	CREATE_FUNC(TetrisGameAreaLayer);
 };
