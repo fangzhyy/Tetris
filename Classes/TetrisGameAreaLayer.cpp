@@ -54,7 +54,7 @@ void TetrisGameAreaLayer::onKeyReleased(EventKeyboard::KeyCode keyCode, Event* u
 	if (keyCode == EventKeyboard::KeyCode::KEY_RIGHT_ARROW) {
 		float xendPos = mActiveBlock->getBlockColCount() * mGridSize + mActiveBlock->getPositionX();
 		float w = getContentSize().width;
-		if (xendPos + mGridSize <= getContentSize().width + 1.0)
+		if (xendPos + mGridSize <= getContentSize().width)
 			mActiveBlock->setPosition(mActiveBlock->getPositionX() + mGridSize, mActiveBlock->getPositionY());
 	}
 }
@@ -109,7 +109,6 @@ TetrisBlock* TetrisGameAreaLayer::makeCustomBlock()
 		}
 		else
 			break;
-
 	}
 	
 	auto block = TetrisBlock::createBlockByStruct(sV, mBlockUnitSprite.at(randomIndex), mScalRatio);
@@ -155,7 +154,10 @@ bool TetrisGameAreaLayer::blockReachBottom()
 			int posX = kv.first + basePosX;
 			int gridIndex = posX / mGridSize;
 			mTopOffsets[gridIndex] = kv.second;
+
 		}
 	}
 	return ret;
 }
+
+

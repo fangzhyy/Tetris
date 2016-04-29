@@ -63,15 +63,14 @@ void TetrisBlock::rotate()
 	setSpriteByStruct();
 }
 
-std::map<int, int> TetrisBlock::getTopOffsets()
+std::vector<Vec2> TetrisBlock::getSpriteOffsets()
 {
 	Vector<Node*> ch = getChildren();
-	std::map<int, int> offsetMap;
+	std::vector<Vec2> offsetV;
 	for (Node* c : ch){
-		int posX = c->getPositionX();
-		int posY = c->getPositionY();
-		if (posY > offsetMap[posX])
-			offsetMap[posX] = posY;
+		int posY = c->getPositionY + c->getContentSize().width * getScale();
+		int posX = c->getPositionX + c->getContentSize().width * getScale();
+		offsetV.push_back(Vec2(posX, posY));
 	}
-	return offsetMap;
+	return offsetV;
 }

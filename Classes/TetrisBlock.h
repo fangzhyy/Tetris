@@ -17,7 +17,7 @@ public:
 	int getBlockColCount(){
 		return mBlockColCount;
 	}
-	std::map<int, int> getTopOffsets();
+	std::vector<Vec2> getSpriteOffsets();
 private:
 	std::vector<unsigned short> mStructs;
 	int mStateIndex;

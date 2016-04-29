@@ -22,7 +22,7 @@ private:
 	Vector<RefPtr<Sprite> > mBlockUnitSprite;
 	static const unsigned short sSquareStructs[7][4];
 	float mScalRatio;
-	float mGridSize;
+	int mGridSize;
 	void renderTest();
 	void dropNewBlock();
 	void onKeyReleased(EventKeyboard::KeyCode keyCode, Event* unused_event);
