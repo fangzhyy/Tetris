@@ -5,7 +5,13 @@
 
 USING_NS_CC;
 
+<<<<<<< Updated upstream
 class TetrisBlock;
+=======
+#ifndef byte
+typedef unsigned char byte;
+#endif
+>>>>>>> Stashed changes
 
 class TetrisGameAreaLayer : public LayerColor {
 private:
@@ -20,7 +26,11 @@ private:
 	void initBlockRectSprite();
     RefPtr<TextureCache> mTexCache;
 	Vector<RefPtr<Sprite> > mBlockUnitSprite;
+<<<<<<< Updated upstream
 	static const unsigned short sSquareStructs[7][4];
+=======
+    static const byte sSquareStructs[];
+>>>>>>> Stashed changes
 	float mScalRatio;
 	int mGridSize;
 	void renderTest();

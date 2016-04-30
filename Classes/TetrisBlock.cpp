@@ -6,8 +6,13 @@ bool TetrisBlock::init()
 	return true;
 }
 
+<<<<<<< Updated upstream
 TetrisBlock* TetrisBlock::createBlockByStruct(std::vector<unsigned short> structs, RefPtr<Sprite> unitSprite, float scaleRatio)
 {	
+=======
+TetrisBlock* TetrisBlock::createBlockByStruct(const byte structNumber, RefPtr<Sprite> unitSprite, float scaleRatio)
+{
+>>>>>>> Stashed changes
 	TetrisBlock* newBlock = TetrisBlock::create();
 	unsigned short mask = 0x01;
 	float unitSize = unitSprite->getContentSize().width;
@@ -19,7 +24,11 @@ TetrisBlock* TetrisBlock::createBlockByStruct(std::vector<unsigned short> struct
 	newBlock->setStruct(structs);
 	newBlock->setSpriteByStruct();
 	newBlock->setScale(scaleRatio);
+<<<<<<< Updated upstream
 	newBlock->setAnchorPoint(Vec2(0, 0));
+=======
+    newBlock->setStruct(structNumber);
+>>>>>>> Stashed changes
 	return newBlock;
 }
 
