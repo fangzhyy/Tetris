@@ -32,7 +32,7 @@ bool TetrisGameAreaLayer::init()
 	setAnchorPoint(Vec2(0 ,0));
 	setPosition(vlb);
 	initBlockRectSprite();
-	schedule(schedule_selector(TetrisGameAreaLayer::onBlockUpdate), 2);
+	schedule(schedule_selector(TetrisGameAreaLayer::onBlockUpdate), 0.5);
 	return true;
 }
 
@@ -53,8 +53,7 @@ void TetrisGameAreaLayer::onKeyReleased(EventKeyboard::KeyCode keyCode, Event* u
 	}
 	if (keyCode == EventKeyboard::KeyCode::KEY_RIGHT_ARROW) {
 		float xendPos = mActiveBlock->getBlockColCount() * mGridSize + mActiveBlock->getPositionX();
-		float w = getContentSize().width;
-		if (xendPos + mGridSize <= getContentSize().width)
+		if (xendPos + mGridSize <= getContentSize().width + 1.0)
 			mActiveBlock->setPosition(mActiveBlock->getPositionX() + mGridSize, mActiveBlock->getPositionY());
 	}
 }
@@ -75,26 +74,20 @@ void TetrisGameAreaLayer::initBlockRectSprite() {
     auto tex = mTexCache->addImage("rect.png");
     float miniBlockSize = tex->getContentSize().height;
     float areaWidth = getContentSize().width;
-	float areaHeight = getContentSize().height;
     float desiredBlockWidth = areaWidth / 10.0;
 	mGridSize = desiredBlockWidth;
 	mScalRatio = desiredBlockWidth / miniBlockSize;
+    //auto dir = Director::getInstance();
+    //dir->setContentScaleFactor(mScalRatio);
     Rect r;
-    int testPos = 0;
 	r.setRect(miniBlockSize, 0, miniBlockSize, miniBlockSize);
 	
 	for (int i = 0; i < KBlockType; i++) {
         //加载材质
 		Sprite* miniSprite = Sprite::createWithTexture(tex, r);
-		//miniSprite->
 		r.setRect(r.origin.x + miniBlockSize, r.origin.y, miniBlockSize, miniBlockSize);
 		RefPtr<Sprite> ptr = RefPtr<Sprite>(miniSprite);
 		mBlockUnitSprite.pushBack(ptr);
-		//测试加载的材质
-  //      miniSprite->setAnchorPoint(Vec2(0,0));
-  //      miniSprite->setPosition(testPos , 0);
-  //     testPos += 50;
-		//testNode->addChild(miniSprite);
     }
 	dropNewBlock();
 }
@@ -144,20 +137,53 @@ void TetrisGameAreaLayer::renderTest()
 
 bool TetrisGameAreaLayer::blockReachBottom()
 {
-	bool ret = mActiveBlock->getPositionY() <= 0;
-	if (ret) {
-		//update topOffsets
-		int basePosX = mActiveBlock->getPositionX();
-		int basePosY = mActiveBlock->getPositionY();
-		std::map<int, int> blockTopOffsetMap = mActiveBlock->getTopOffsets();
-		for (auto& kv : blockTopOffsetMap) {
-			int posX = kv.first + basePosX;
-			int gridIndex = posX / mGridSize;
-			mTopOffsets[gridIndex] = kv.second;
+    bool dead = false;
+    int blockPosY = mActiveBlock->getPositionY();
+    int blockPosX = mActiveBlock->getPositionX();
+    std::vector<Vec2> spritPos = mActiveBlock->getSpriteOffsets();
+    std::vector<std::pair<int, int> > spriteOffsets;
+    for(Vec2 v : spritPos) {
+        int spRitePosOffsetX = (blockPosX + v.x)/mGridSize;
+        int spRitePosOffsetY = (blockPosY + v.y)/mGridSize;
+        spriteOffsets.push_back(std::pair<int, int>(spRitePosOffsetX, spRitePosOffsetY));
+        if(spRitePosOffsetY == 0 || mGridInfo[spRitePosOffsetX][spRitePosOffsetY - 1] == 1)
+            dead = true;
+    }
+    if(dead) {
+        for( std::pair<int, int> offset : spriteOffsets) {
+            mGridInfo[offset.first][offset.second] = 1;
+        }
+        updateBottomBlocks();
+    }
+    return dead;
+}
 
-		}
-	}
-	return ret;
+void TetrisGameAreaLayer::updateBottomBlocks() {
+    
+    auto rt = RenderTexture::create(getContentSize().width, getContentSize().height);
+    rt->retain();
+    rt->beginWithClear(0, 255, 255, 255);
+    if(mBottomBlocks) {
+        mBottomBlocks->visit();
+    }
+    if(mActiveBlock)
+       mActiveBlock->visitSprite();
+
+    rt->end();
+    if(mBottomBlocks) {
+        removeChild(mBottomBlocks);
+        mBottomBlocks = nullptr;
+    }
+    if(mActiveBlock) {
+        removeChild(mActiveBlock);
+        mActiveBlock = nullptr;
+    }
+    mBottomBlocks = Sprite::createWithTexture(rt->getSprite()->getTexture());
+
+    mBottomBlocks->setPosition(mBottomBlocks->getContentSize().width/2, mBottomBlocks->getContentSize().height/2);
+    mBottomBlocks->setFlippedY(true);
+    addChild(mBottomBlocks);
+    
 }
 
 

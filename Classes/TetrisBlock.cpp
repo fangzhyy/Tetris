@@ -6,16 +6,9 @@ bool TetrisBlock::init()
 	return true;
 }
 
-<<<<<<< Updated upstream
 TetrisBlock* TetrisBlock::createBlockByStruct(std::vector<unsigned short> structs, RefPtr<Sprite> unitSprite, float scaleRatio)
-{	
-=======
-TetrisBlock* TetrisBlock::createBlockByStruct(const byte structNumber, RefPtr<Sprite> unitSprite, float scaleRatio)
 {
->>>>>>> Stashed changes
 	TetrisBlock* newBlock = TetrisBlock::create();
-	unsigned short mask = 0x01;
-	float unitSize = unitSprite->getContentSize().width;
 	for (int i = 0; i < 4; i++) {
 		auto newSp = Sprite::createWithSpriteFrame(unitSprite->getSpriteFrame());
 		newSp->setAnchorPoint(Vec2(0,0));
@@ -24,11 +17,7 @@ TetrisBlock* TetrisBlock::createBlockByStruct(const byte structNumber, RefPtr<Sp
 	newBlock->setStruct(structs);
 	newBlock->setSpriteByStruct();
 	newBlock->setScale(scaleRatio);
-<<<<<<< Updated upstream
 	newBlock->setAnchorPoint(Vec2(0, 0));
-=======
-    newBlock->setStruct(structNumber);
->>>>>>> Stashed changes
 	return newBlock;
 }
 
@@ -77,9 +66,19 @@ std::vector<Vec2> TetrisBlock::getSpriteOffsets()
 	Vector<Node*> ch = getChildren();
 	std::vector<Vec2> offsetV;
 	for (Node* c : ch){
-		int posY = c->getPositionY + c->getContentSize().width * getScale();
-		int posX = c->getPositionX + c->getContentSize().width * getScale();
+		int posY = c->getPositionY() + c->getContentSize().width * getScale();
+		int posX = c->getPositionX() + c->getContentSize().width * getScale();
 		offsetV.push_back(Vec2(posX, posY));
 	}
 	return offsetV;
+}
+
+void TetrisBlock::visitSprite() {
+    Vector<Node*> ch = getChildren();
+    Vec2 blockPos = getPosition();
+    for(Node* c: ch) {
+        c->setPosition(Vec2(blockPos.x + c->getPositionX(), blockPos.y + c->getPositionY()));
+        c->visit();
+    }
+    
 }
