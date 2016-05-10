@@ -286,3 +286,4 @@ $RECYCLE.BIN/
 *.exp
 *.tlog
 Debug.win32/
+proj.ios_mac/Tetris.xcodeproj/project.xcworkspace/xcuserdata/fangzh.xcuserdatad/UserInterfaceState.xcuserstate
