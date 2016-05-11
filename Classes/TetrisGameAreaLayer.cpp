@@ -77,7 +77,7 @@ void TetrisGameAreaLayer::initBlockRectSprite() {
     float desiredBlockWidth = areaWidth / 10.0;
 	mGridSize = desiredBlockWidth;
 	mScalRatio = desiredBlockWidth / miniBlockSize;
-    //auto dir = Director::getInstance();
+	//auto dir = Director::getInstance();
     //dir->setContentScaleFactor(mScalRatio);
     Rect r;
 	r.setRect(miniBlockSize, 0, miniBlockSize, miniBlockSize);
@@ -140,27 +140,33 @@ bool TetrisGameAreaLayer::blockReachBottom()
     bool dead = false;
     int blockPosY = mActiveBlock->getPositionY();
     int blockPosX = mActiveBlock->getPositionX();
-    std::vector<Vec2> spritPos = mActiveBlock->getSpriteOffsets();
-    std::vector<std::pair<int, int> > spriteOffsets;
-    for(Vec2 v : spritPos) {
-        int spRitePosOffsetX = (blockPosX + v.x)/mGridSize;
-        int spRitePosOffsetY = (blockPosY + v.y)/mGridSize;
-        spriteOffsets.push_back(std::pair<int, int>(spRitePosOffsetX, spRitePosOffsetY));
-        if(spRitePosOffsetY == 0 || mGridInfo[spRitePosOffsetX][spRitePosOffsetY - 1] == 1)
+	std::vector<TetrisBlockPos> spritPos = mActiveBlock->getSpriteOffsets();
+	for (TetrisBlockPos& v : spritPos) {
+		v.mIndexXInGrid = (blockPosX + v.mPos.x) / mGridSize;
+        v.mIndexYInGrid = (blockPosY + v.mPos.y)/mGridSize;
+		if (v.mIndexYInGrid == 0 || mGridInfo[v.mIndexXInGrid][v.mIndexYInGrid - 1] != 0)
             dead = true;
     }
     if(dead) {
-        for( std::pair<int, int> offset : spriteOffsets) {
-            mGridInfo[offset.first][offset.second] = 1;
-        }
-        updateBottomBlocks();
+		for (TetrisBlockPos info : spritPos) {
+			Sprite* sp = Sprite::createWithSpriteFrame(info.mSprite->getSpriteFrame());
+			addChild(sp);
+			sp->setAnchorPoint(Vec2::ZERO);
+			sp->setContentSize(info.mSprite->getContentSize() * mScalRatio);
+			sp->setScale(mScalRatio);
+			int x = info.mSprite->getPositionX();
+			sp->setPosition(mActiveBlock->getPositionX() + info.mSprite->getPositionX() * mScalRatio
+				, mActiveBlock->getPositionY() + info.mSprite->getPositionY() * mScalRatio);
+			mGridInfo[info.mIndexXInGrid][info.mIndexYInGrid] = sp;
+		}
+		removeChild(mActiveBlock);
     }
     return dead;
 }
 
 void TetrisGameAreaLayer::updateBottomBlocks() {
     
-    auto rt = RenderTexture::create(getContentSize().width, getContentSize().height);
+  /*  auto rt = RenderTexture::create(getContentSize().width, getContentSize().height);
     rt->retain();
     rt->beginWithClear(0, 255, 255, 255);
     if(mBottomBlocks) {
@@ -182,7 +188,7 @@ void TetrisGameAreaLayer::updateBottomBlocks() {
 
     mBottomBlocks->setPosition(mBottomBlocks->getContentSize().width/2, mBottomBlocks->getContentSize().height/2);
     mBottomBlocks->setFlippedY(true);
-    addChild(mBottomBlocks);
+    addChild(mBottomBlocks);*/
     
 }
 

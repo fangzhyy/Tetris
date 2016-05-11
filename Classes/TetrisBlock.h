@@ -9,20 +9,32 @@ USING_NS_CC;
 typedef unsigned char byte;
 #endif
 
+class TetrisBlockPos
+{
+public:
+	TetrisBlockPos(Vec2 pos, Sprite* sp) : mPos(pos), mSprite(sp), mIndexXInGrid(0), mIndexYInGrid(0){
+
+	}
+	Vec2 mPos;
+	Sprite* mSprite;
+	int mIndexXInGrid;
+	int mIndexYInGrid;
+
+};
+
 class TetrisBlock : public Node
 {
 private:
 	TetrisBlock() : mStateIndex(0), mBlockLineCount(0), mBlockColCount(0){};
 	bool init();
 public:
-
 	static TetrisBlock* createBlockByStruct(std::vector<unsigned short> structs, RefPtr<Sprite> unitSprite, float scaleRatio);
 	CREATE_FUNC(TetrisBlock);
 	void rotate();
 	int getBlockColCount(){
 		return mBlockColCount;
 	}
-	std::vector<Vec2> getSpriteOffsets();
+	std::vector<TetrisBlockPos> getSpriteOffsets();
     void visitSprite();
 private:
 	std::vector<unsigned short> mStructs;

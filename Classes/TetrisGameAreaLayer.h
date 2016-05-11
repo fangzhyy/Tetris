@@ -19,7 +19,7 @@ private:
 	static const int KBlockType = 7;
 	static const float KAreaHRationInVisible;
 	static const int mGrindCol = 10;
-    byte mGridInfo[mGrindCol][mGrindCol * 2 + 5];
+    Sprite* mGridInfo[mGrindCol][mGrindCol * 2 + 5];
     Sprite* mBottomBlocks;
 	TetrisBlock* makeCustomBlock();
 	void initBlockRectSprite();
@@ -38,7 +38,7 @@ private:
     RenderTexture* mBottomTex;
 public:
 	TetrisGameAreaLayer() : mActiveBlock(nullptr), mBottomTex(nullptr){
-		memset(mGridInfo, 0, sizeof(mGrindCol));
+		memset(mGridInfo, 0, sizeof(mGridInfo));
 	};
 	CREATE_FUNC(TetrisGameAreaLayer);
 };
