@@ -30,14 +30,26 @@ private:
 	float mGridSize;
 	void renderTest();
 	void dropNewBlock();
+	void onBlockAcc();
+	int getTopGridIndex(int xIndex);
+	Vec2 getBlockEndPos();
 	void onKeyReleased(EventKeyboard::KeyCode keyCode, Event* unused_event);
+	void onKeyDown(EventKeyboard::KeyCode keyCode, Event* unused_event);
 	bool blockReachBottom();
 	TetrisBlock* mActiveBlock;
+	TetrisBlock* mShadowBlock;
 	void onBlockUpdate(float delta);
     void updateBottomBlocks();
+	void dealShadowBlock();
+	virtual void update(float dt) override;
     RenderTexture* mBottomTex;
+	bool mAcc;
+	float mNormalSpeed;
+	float mAccSpeed;
+	float mUpdateDt;
 public:
-	TetrisGameAreaLayer() : mActiveBlock(nullptr), mBottomTex(nullptr){
+	TetrisGameAreaLayer() : mActiveBlock(nullptr), mNormalSpeed(0.5), mAccSpeed(0.1)
+							,mAcc(false), mShadowBlock(nullptr), mUpdateDt(0){
 		memset(mGridInfo, 0, sizeof(mGridInfo));
 	};
 	CREATE_FUNC(TetrisGameAreaLayer);

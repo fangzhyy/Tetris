@@ -36,8 +36,15 @@ public:
 	}
 	std::vector<TetrisBlockPos> getSpriteOffsets();
     void visitSprite();
+	TetrisBlock* createShadowBlock();
 private:
 	std::vector<unsigned short> mStructs;
+	int getState(){
+		return mStateIndex;
+	}
+	void setState(int s) {
+		mStateIndex = s;
+	}
 	int mStateIndex;
 	void setStruct(std::vector<unsigned short> s){
 		mStructs = s;

@@ -21,6 +21,23 @@ TetrisBlock* TetrisBlock::createBlockByStruct(std::vector<unsigned short> struct
 	return newBlock;
 }
 
+TetrisBlock* TetrisBlock::createShadowBlock()
+{
+	TetrisBlock* newBlock = TetrisBlock::create();
+	for (int i = 0; i < 4; i++) {
+		auto newSp = Sprite::createWithSpriteFrame(static_cast<Sprite*>(getChildren().at(0))->getSpriteFrame());
+		newSp->setAnchorPoint(Vec2(0, 0));
+		newBlock->addChild(newSp);
+	}
+	newBlock->setStruct(mStructs);
+	newBlock->setState(getState());
+	newBlock->setSpriteByStruct();
+	newBlock->setScale(getScale());
+	newBlock->setAnchorPoint(Vec2(0, 0));
+	return newBlock;
+
+}
+
 void TetrisBlock::setSpriteByStruct()
 {
 	Vector<Node*> c = getChildren();
@@ -66,8 +83,8 @@ std::vector<TetrisBlockPos> TetrisBlock::getSpriteOffsets()
 	Vector<Node*> ch = getChildren();
 	std::vector<TetrisBlockPos> offsetV;
 	for (Node* c : ch){
-		int posY = c->getPositionY() + c->getContentSize().width * getScale();
-		int posX = c->getPositionX() + c->getContentSize().width * getScale();
+		int posY = c->getPositionY() + c->getContentSize().width * getScale()/2;
+		int posX = c->getPositionX() + c->getContentSize().width * getScale()/2;
 		offsetV.push_back(TetrisBlockPos(Vec2(posX, posY), static_cast<Sprite*>(c)));
 	}
 	return offsetV;
