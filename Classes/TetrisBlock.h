@@ -9,49 +9,58 @@ USING_NS_CC;
 typedef unsigned char byte;
 #endif
 
-class TetrisBlockPos
-{
-public:
-	TetrisBlockPos(Vec2 pos, Sprite* sp) : mPos(pos), mSprite(sp), mIndexXInGrid(0), mIndexYInGrid(0){
+//class TetrisBlockPos
+//{
+//public:
+//	TetrisBlockPos(Vec2 pos, Sprite* sp) : mPos(pos), mSprite(sp), mIndexXInGrid(0), mIndexYInGrid(0){
+//
+//	}
+//	Vec2 mPos;
+//	Sprite* mSprite;
+//	int mIndexXInGrid;
+//	int mIndexYInGrid;
+//
+//};
 
-	}
-	Vec2 mPos;
-	Sprite* mSprite;
-	int mIndexXInGrid;
-	int mIndexYInGrid;
-
-};
-
-class TetrisBlock : public Node
+class TetrisBlock : public Ref
 {
 private:
-	TetrisBlock() : mStateIndex(0), mBlockLineCount(0), mBlockColCount(0){};
+	TetrisBlock() : mStateIndex(0){};
 	bool init();
 public:
-	static TetrisBlock* createBlockByStruct(std::vector<unsigned short> structs, RefPtr<Sprite> unitSprite, float scaleRatio);
-	CREATE_FUNC(TetrisBlock);
+	static TetrisBlock* createBlockByStruct(std::vector<unsigned short> structs, std::pair<int, int> posInGrind, int blockType);
+	TetrisBlock* makeShadowBlock();
 	void rotate();
-	int getBlockColCount(){
-		return mBlockColCount;
+	int getType() {
+		return mBlockType;
 	}
-	std::vector<TetrisBlockPos> getSpriteOffsets();
-    void visitSprite();
-	TetrisBlock* createShadowBlock();
+	inline unsigned short getBlockData() {
+		return mStructs.at(mStateIndex);
+	}
+	void moveInX(bool left);
+	bool outOfBounds(int xInGrind);
+	inline void moveDown() {
+		mPosInGrid.second++;
+	}
+	inline std::pair<int, int> getPosInGrid(){
+		return mPosInGrid;
+	}
+	inline void setPosInGrid(std::pair<int,int> posInGrid) {
+		mPosInGrid = posInGrid;
+	}
 private:
 	std::vector<unsigned short> mStructs;
-	int getState(){
-		return mStateIndex;
-	}
+	std::pair<int, int> mPosInGrid;
 	void setState(int s) {
 		mStateIndex = s;
 	}
-	int mStateIndex;
-	void setStruct(std::vector<unsigned short> s){
-		mStructs = s;
+	void setType(int type){
+		mBlockType = type;
 	}
+	int mStateIndex;
+	void setStruct(std::vector<unsigned short> s);
 	void setSpriteByStruct();
-	int mBlockLineCount;
-	int mBlockColCount;
+	int mBlockType;
 };
 
 

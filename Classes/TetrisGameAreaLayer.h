@@ -11,46 +11,56 @@ class TetrisBlock;
 typedef unsigned char byte;
 #endif
 
+class UnitInfo : public Ref {
+public:
+	UnitInfo(int x, int y, Sprite* sp) : xInGrid(x), yInGrid(y), ptrSp(sp){};
+	int xInGrid;
+	int yInGrid;
+	Sprite* ptrSp;
+};
+
 class TetrisGameAreaLayer : public LayerColor {
+public:
+	static const int KGrindCol = 10;
 private:
 	bool init();
-	static const int KHBorder = 5;
-	static const int KWBorder = 5;
-	static const int KBlockType = 7;
-	static const float KAreaHRationInVisible;
-	static const int mGrindCol = 10;
-    Sprite* mGridInfo[mGrindCol][mGrindCol * 2 + 5];
-    Sprite* mBottomBlocks;
 	TetrisBlock* makeCustomBlock();
 	void initBlockRectSprite();
     RefPtr<TextureCache> mTexCache;
 	Vector<RefPtr<Sprite> > mBlockUnitSprite;
-	static const unsigned short sSquareStructs[KBlockType][4];
-	float mScalRatio;
-	float mGridSize;
-	void renderTest();
 	void dropNewBlock();
+	void drawBlock(TetrisBlock* pBlock, Vector<RefPtr<UnitInfo> >& sprites);
+	void drawAllBlocks();
 	void onBlockAcc();
 	int getTopGridIndex(int xIndex);
-	Vec2 getBlockEndPos();
 	void onKeyReleased(EventKeyboard::KeyCode keyCode, Event* unused_event);
 	void onKeyDown(EventKeyboard::KeyCode keyCode, Event* unused_event);
 	bool blockReachBottom();
+    void updateBottomBlocks();
+	void drawShadowBlock();
+	void prepareSprite(int blockType, Vector<RefPtr<UnitInfo> >& sprites);
+	virtual void update(float dt) override;
+private:
 	TetrisBlock* mActiveBlock;
 	TetrisBlock* mShadowBlock;
-	void onBlockUpdate(float delta);
-    void updateBottomBlocks();
-	void dealShadowBlock();
-	virtual void update(float dt) override;
-    RenderTexture* mBottomTex;
 	bool mAcc;
 	float mNormalSpeed;
 	float mAccSpeed;
 	float mUpdateDt;
+	float mScalRatio;
+	float mGridSize;
+	Vector<RefPtr<UnitInfo> > mActiveSprites;
+	Vector<RefPtr<UnitInfo> > mShadowSprites;
+	static const int KHBorder = 5;
+	static const int KWBorder = 5;
+	static const int KBlockType = 7;
+	static const float KAreaHRationInVisible;
+	static const int KGrindLine = 24;
+	static const unsigned short sSquareStructs[KBlockType][4];
+	RefPtr<Sprite> mGridInfo[KGrindCol][KGrindLine];
 public:
 	TetrisGameAreaLayer() : mActiveBlock(nullptr), mNormalSpeed(0.5), mAccSpeed(0.1)
 							,mAcc(false), mShadowBlock(nullptr), mUpdateDt(0){
-		memset(mGridInfo, 0, sizeof(mGridInfo));
 	};
 	CREATE_FUNC(TetrisGameAreaLayer);
 };

@@ -40,31 +40,30 @@ bool TetrisGameAreaLayer::init()
 
 void TetrisGameAreaLayer::onKeyDown(EventKeyboard::KeyCode keyCode, Event* unused_event)
 {
+	if (mActiveBlock == nullptr)
+		return;
 	if (keyCode == EventKeyboard::KeyCode::KEY_SPACE) {
-		if (mActiveBlock != nullptr){
-			mActiveBlock->rotate();
-		}
-		float xendPos = mActiveBlock->getBlockColCount() * mGridSize + mActiveBlock->getPositionX();
-		while (xendPos > getContentSize().width) {
-			mActiveBlock->setPosition(mActiveBlock->getPositionX() - mGridSize, mActiveBlock->getPositionY());
-			xendPos = mActiveBlock->getBlockColCount() * mGridSize + mActiveBlock->getPositionX();
-		}
-		dealShadowBlock();
+		mActiveBlock->rotate();
+		mShadowBlock->rotate();
+		drawAllBlocks();
 	}
 	else if (keyCode == EventKeyboard::KeyCode::KEY_LEFT_ARROW) {
-		if (mActiveBlock->getPositionX() >= mGridSize)
-			mActiveBlock->setPosition(mActiveBlock->getPositionX() - mGridSize, mActiveBlock->getPositionY());
-			dealShadowBlock();
+		mActiveBlock->moveInX(true);
+		drawAllBlocks();
 	}
 	else if (keyCode == EventKeyboard::KeyCode::KEY_RIGHT_ARROW) {
-		float xendPos = mActiveBlock->getBlockColCount() * mGridSize + mActiveBlock->getPositionX();
-		if (xendPos + mGridSize <= getContentSize().width + 1.0)
-			mActiveBlock->setPosition(mActiveBlock->getPositionX() + mGridSize, mActiveBlock->getPositionY());
-		dealShadowBlock();
+		mActiveBlock->moveInX(false);
+		drawAllBlocks();
 	}
 	else if (keyCode == EventKeyboard::KeyCode::KEY_DOWN_ARROW) {
 		mAcc = true;
 	}
+
+}
+
+void TetrisGameAreaLayer::drawAllBlocks() {
+	drawBlock(mActiveBlock, mActiveSprites);
+	drawShadowBlock();
 
 }
 
@@ -73,14 +72,6 @@ void TetrisGameAreaLayer::onKeyReleased(EventKeyboard::KeyCode keyCode, Event* u
 	if (keyCode == EventKeyboard::KeyCode::KEY_DOWN_ARROW) {
 		mAcc = false;
 	}
-}
-
-void TetrisGameAreaLayer::onBlockUpdate(float delta)
-{
-	if (blockReachBottom())
-		dropNewBlock();
-	else
-		mActiveBlock->setPosition(mActiveBlock->getPositionX(), mActiveBlock->getPositionY() - mGridSize);	
 }
 
 void TetrisGameAreaLayer::initBlockRectSprite() {
@@ -94,8 +85,6 @@ void TetrisGameAreaLayer::initBlockRectSprite() {
     float desiredBlockWidth = areaWidth / 10.0;
 	mGridSize = desiredBlockWidth;
 	mScalRatio = desiredBlockWidth / miniBlockSize;
-	//auto dir = Director::getInstance();
-    //dir->setContentScaleFactor(mScalRatio);
     Rect r;
 	r.setRect(miniBlockSize, 0, miniBlockSize, miniBlockSize);
 	for (int i = 0; i < KBlockType; i++) {
@@ -123,11 +112,14 @@ void TetrisGameAreaLayer::update(float dt)
 	if (mUpdateDt < mNormalSpeed)
 		return;
 	mUpdateDt = 0;
-	if (blockReachBottom())
-		dropNewBlock();
-	else
-		mActiveBlock->setPosition(mActiveBlock->getPositionX(), mActiveBlock->getPositionY() - mGridSize);
-
+	if (mActiveBlock != nullptr) {
+		if (blockReachBottom())
+			dropNewBlock();
+		else{
+			mActiveBlock->moveDown();
+			drawBlock(mActiveBlock, mActiveSprites);
+		}
+	}
 }
 
 TetrisBlock* TetrisGameAreaLayer::makeCustomBlock()
@@ -141,105 +133,115 @@ TetrisBlock* TetrisGameAreaLayer::makeCustomBlock()
 		else
 			break;
 	}
-	
-	auto block = TetrisBlock::createBlockByStruct(sV, mBlockUnitSprite.at(randomIndex), mScalRatio);
+	auto block = TetrisBlock::createBlockByStruct(sV, std::pair<int, int>(0,3), randomIndex);
 	return block;
 }
 
 void TetrisGameAreaLayer::dropNewBlock()
 {
-	auto newBlock = makeCustomBlock();
-	Size s = newBlock->getContentSize();
-	Size layerSize = getContentSize();
-	newBlock->setPosition(Vec2(0, layerSize.height));
-	addChild(newBlock);
-	mActiveBlock = newBlock;
-	dealShadowBlock();
-}
-
-void TetrisGameAreaLayer::dealShadowBlock(){
-	if (mShadowBlock == nullptr)
-		mShadowBlock = mActiveBlock->createShadowBlock();
-	else
-		removeChild(mShadowBlock);
-	mShadowBlock = mActiveBlock->createShadowBlock();
-	Vec2 endPos = getBlockEndPos();
-	mShadowBlock->setPosition(endPos);
-	addChild(mShadowBlock);
-}
-
-Vec2 TetrisGameAreaLayer::getBlockEndPos()
-{
-	int blockPosY = mActiveBlock->getPositionY();
-	int blockPosX = mActiveBlock->getPositionX();
-	std::vector<TetrisBlockPos> spritPos = mActiveBlock->getSpriteOffsets();
-	int minGridDistance = -1;
-	for (TetrisBlockPos pos : spritPos) {
-		int indexInGridX = (blockPosX + pos.mPos.x) / mGridSize;
-		int indexInGridY = (blockPosY + pos.mPos.y) / mGridSize;
-		int topIndex = getTopGridIndex(indexInGridX);
-		//topIndex = topIndex < 0 ? 0 : topIndex;
-		int gridDistance =  indexInGridY - topIndex;
-		if (minGridDistance < 0 || gridDistance < minGridDistance)
-			minGridDistance = gridDistance;
+	CC_SAFE_RELEASE(mActiveBlock);
+	CC_SAFE_RELEASE(mShadowBlock);
+	mActiveBlock = nullptr;
+	mShadowBlock = nullptr;
+	mActiveSprites.clear();
+	for (auto info : mShadowSprites) {
+		removeChild(info->ptrSp);
 	}
-	float posX = mActiveBlock->getPositionX();
-	float posY = mActiveBlock->getPositionY() - (minGridDistance - 1) * mGridSize;
-	return Vec2(posX, posY);
+	mShadowSprites.clear();
+	auto newBlock = makeCustomBlock();
+	mActiveBlock = newBlock;
+	drawAllBlocks();
+	//dealShadowBlock();
+}
+
+void TetrisGameAreaLayer::prepareSprite(int blockType, Vector<RefPtr<UnitInfo> >& sprites){
+	if (sprites.size() == 0) {
+		for (int i = 0; i < 4; i++) {
+			auto newSp = Sprite::createWithSpriteFrame(mBlockUnitSprite.at(blockType)->getSpriteFrame());
+			newSp->setAnchorPoint(Vec2::ZERO);
+			newSp->setScale(mScalRatio);
+			sprites.pushBack(new UnitInfo(0, 0, newSp));
+			addChild(newSp);
+		}
+	}
+}
+
+void TetrisGameAreaLayer::drawBlock(TetrisBlock* pBlock, Vector<RefPtr<UnitInfo> >& sprites){
+	unsigned short blockStruct = pBlock->getBlockData();
+	std::pair<int, int> blockPosInGrind = pBlock->getPosInGrid();
+	int blockType = pBlock->getType();
+	prepareSprite(blockType, sprites);
+	unsigned short mask = 1 << 15;
+	int unitIndex = 0;
+	for (int i = 0; i < 16; i++) {
+		if (blockStruct & mask){
+			int line = i / 4;
+			int col = i % 4;
+			int unitPosX = blockPosInGrind.first + col;
+			int unitPosY = blockPosInGrind.second + line;
+			auto sp = sprites.at(unitIndex)->ptrSp;
+			int drawPosY = KGrindLine - unitPosY - 1;
+			sp->setPosition(unitPosX * mGridSize, drawPosY * mGridSize);
+			sprites.at(unitIndex)->xInGrid = unitPosX;
+			sprites.at(unitIndex)->yInGrid = unitPosY;
+			unitIndex++;
+		}
+		mask = mask >> 1;
+		if (unitIndex == sprites.size())
+			break;
+	}
+
+}
+
+void TetrisGameAreaLayer::drawShadowBlock(){
+	int blockType = mActiveBlock->getType();
+	prepareSprite(blockType, mShadowSprites);
+	for (auto info : mShadowSprites){
+		info->ptrSp->setOpacity(80);
+	}
+	if (mShadowBlock == nullptr){
+		mShadowBlock = mActiveBlock->makeShadowBlock();
+	}
+	int minGridDistance = -1;
+	for (auto info : mActiveSprites) {
+		int topIndex = getTopGridIndex(info->xInGrid);
+		int gridDistance = topIndex - info->yInGrid;
+		if (minGridDistance < 0 || gridDistance < minGridDistance) {
+			minGridDistance = gridDistance;
+		}
+	}
+	int posY = mActiveBlock->getPosInGrid().second + minGridDistance - 1;
+	mShadowBlock->setPosInGrid(std::pair<int, int>(mActiveBlock->getPosInGrid().first, posY));
+	drawBlock(mShadowBlock, mShadowSprites);
 }
 
 int TetrisGameAreaLayer::getTopGridIndex(int xIndex)
 {
-	for (int i = mGrindCol * 2 - 1; i >= 0; i--) {
-		if (mGridInfo[xIndex][i] != 0)
+	int i = 0;
+	for (; i < KGrindLine; i++){
+		if (mGridInfo[xIndex][i] != nullptr)
 			return i;
 	}
-	return -1;
-}
-
-void TetrisGameAreaLayer::renderTest()
-{
-	auto rt = RenderTexture::create(getContentSize().width, getContentSize().height);
-	rt->begin();
-	Vec2 pos(50,300);
-	for (auto sp : mBlockUnitSprite) {
-		sp->setPosition(pos);
-		sp->visit();
-		pos.x = pos.x + 50;
-	}
-	rt->end();
-	auto newSp = Sprite::createWithTexture(rt->getSprite()->getTexture());
-	newSp->setAnchorPoint(Vec2(0,0));
-	addChild(newSp);
+	return i;
 }
 
 bool TetrisGameAreaLayer::blockReachBottom()
 {
-    bool dead = false;
-    int blockPosY = mActiveBlock->getPositionY();
-    int blockPosX = mActiveBlock->getPositionX();
-	std::vector<TetrisBlockPos> spritPos = mActiveBlock->getSpriteOffsets();
-	for (TetrisBlockPos& v : spritPos) {
-		v.mIndexXInGrid = (blockPosX + v.mPos.x) / mGridSize;
-        v.mIndexYInGrid = (blockPosY + v.mPos.y)/mGridSize;
-		if (v.mIndexYInGrid == 0 || mGridInfo[v.mIndexXInGrid][v.mIndexYInGrid - 1] != 0)
-            dead = true;
-    }
-    if(dead) {
-		for (TetrisBlockPos info : spritPos) {
-			Sprite* sp = Sprite::createWithSpriteFrame(info.mSprite->getSpriteFrame());
-			addChild(sp);
-			sp->setAnchorPoint(Vec2::ZERO);
-			sp->setContentSize(info.mSprite->getContentSize() * mScalRatio);
-			sp->setScale(mScalRatio);
-			int x = info.mSprite->getPositionX();
-			sp->setPosition(mActiveBlock->getPositionX() + info.mSprite->getPositionX() * mScalRatio
-				, mActiveBlock->getPositionY() + info.mSprite->getPositionY() * mScalRatio);
-			mGridInfo[info.mIndexXInGrid][info.mIndexYInGrid] = sp;
+	bool dead = false;
+	for (auto info : mActiveSprites){
+		if (info->yInGrid == KGrindLine - 1 || mGridInfo[info->xInGrid][info->yInGrid + 1] != nullptr){
+			dead = true;
+			break;
 		}
-		removeChild(mActiveBlock);
-    }
-    return dead;
+	}
+	if (dead) {
+		for (auto info : mActiveSprites){
+			int xx = info->xInGrid;
+			int yy = info->yInGrid;
+			mGridInfo[info->xInGrid][info->yInGrid] = info->ptrSp;
+		}
+	}
+	return dead;
 }
 
 void TetrisGameAreaLayer::updateBottomBlocks() {
