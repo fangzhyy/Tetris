@@ -17,7 +17,7 @@ const unsigned short TetrisGameAreaLayer::sSquareStructs[7][4] = {
 
 bool TetrisGameAreaLayer::init()
 {
-	LayerColor::initWithColor(Color4B(255, 255, 255, 255));
+	LayerColor::initWithColor(Color4B(255, 100, 100, 255));
 	auto keyListener = EventListenerKeyboard::create();
 	keyListener->setEnabled(true);
 	keyListener->onKeyReleased = std::bind(&TetrisGameAreaLayer::onKeyReleased, this, std::placeholders::_1,std::placeholders::_2);
@@ -40,12 +40,18 @@ bool TetrisGameAreaLayer::init()
 
 void TetrisGameAreaLayer::onKeyDown(EventKeyboard::KeyCode keyCode, Event* unused_event)
 {
-	if (mActiveBlock == nullptr)
+	if (mActiveBlock == nullptr || mAcc)
 		return;
 	if (keyCode == EventKeyboard::KeyCode::KEY_SPACE) {
 		mActiveBlock->rotate();
+		drawBlock(mActiveBlock, mActiveSprites);
+		while (checkIsBottom(true)) {
+			mActiveBlock->moveUp();
+			drawBlock(mActiveBlock, mActiveSprites);
+		
+		}
 		mShadowBlock->rotate();
-		drawAllBlocks();
+		drawShadowBlock();
 	}
 	else if (keyCode == EventKeyboard::KeyCode::KEY_LEFT_ARROW) {
 		mActiveBlock->moveInX(true);
@@ -56,7 +62,7 @@ void TetrisGameAreaLayer::onKeyDown(EventKeyboard::KeyCode keyCode, Event* unuse
 		drawAllBlocks();
 	}
 	else if (keyCode == EventKeyboard::KeyCode::KEY_DOWN_ARROW) {
-		mAcc = true;
+		onBlockAcc();
 	}
 
 }
@@ -71,6 +77,9 @@ void TetrisGameAreaLayer::onKeyReleased(EventKeyboard::KeyCode keyCode, Event* u
 {
 	if (keyCode == EventKeyboard::KeyCode::KEY_DOWN_ARROW) {
 		mAcc = false;
+		for (auto unit : mActiveSprites) {
+			unit->ptrSp->stopAllActions();
+		}
 	}
 }
 
@@ -96,10 +105,46 @@ void TetrisGameAreaLayer::initBlockRectSprite() {
 	dropNewBlock();
 }
 
+void TetrisGameAreaLayer::onBlockAccDone()
+{
+	bool foundOnce = false;
+	for (auto unit : mActiveSprites) {
+		if (unit->ptrSp->getNumberOfRunningActions() > 0) {
+			if (foundOnce)
+				return;
+			foundOnce = true;
+		}
+	}
+	mActiveBlock->moveDown();
+	if (mShadowBlock->getPosInGrid() == mActiveBlock->getPosInGrid()) {
+		mAcc = false;
+		mActiveBlock->setPosInGrid(mShadowBlock->getPosInGrid());
+		drawBlock(mActiveBlock, mActiveSprites);
+		onBlockReachBottom();
+		dropNewBlock();
+		return;
+	}
+	for (auto unit : mActiveSprites) {
+		drawBlock(mActiveBlock, mActiveSprites);
+		auto cb = CallFunc::create(std::bind(&TetrisGameAreaLayer::onBlockAccDone, this));
+		auto move = MoveBy::create(0.001, Vec2(0, -1 * mGridSize));
+		auto sq = Sequence::create(move, cb, NULL);
+		unit->ptrSp->runAction(sq);
+	}
+
+}
+
 void TetrisGameAreaLayer::onBlockAcc()
 {
-	
-
+	mAcc = true;
+	if (mShadowBlock != nullptr && mActiveBlock != nullptr){
+		for (auto unit : mActiveSprites) {
+			auto cb = CallFunc::create(std::bind(&TetrisGameAreaLayer::onBlockAccDone, this));
+			auto move = MoveBy::create(0.001, Vec2(0, -1 * mGridSize));
+			auto sq = Sequence::create(move, cb, NULL);
+			unit->ptrSp->runAction(sq);
+		}
+	}
 }
 
 void TetrisGameAreaLayer::update(float dt)
@@ -113,7 +158,7 @@ void TetrisGameAreaLayer::update(float dt)
 		return;
 	mUpdateDt = 0;
 	if (mActiveBlock != nullptr) {
-		if (blockReachBottom())
+		if (onBlockReachBottom())
 			dropNewBlock();
 		else{
 			mActiveBlock->moveDown();
@@ -225,15 +270,25 @@ int TetrisGameAreaLayer::getTopGridIndex(int xIndex)
 	return i;
 }
 
-bool TetrisGameAreaLayer::blockReachBottom()
+bool TetrisGameAreaLayer::checkIsBottom(bool overlapCheck)
 {
-	bool dead = false;
+
 	for (auto info : mActiveSprites){
-		if (info->yInGrid == KGrindLine - 1 || mGridInfo[info->xInGrid][info->yInGrid + 1] != nullptr){
-			dead = true;
-			break;
+		if (overlapCheck){
+			if (info->yInGrid > KGrindLine - 1 || mGridInfo[info->xInGrid][info->yInGrid] != nullptr){
+				return true;
+			}
+		}
+		else if (info->yInGrid == KGrindLine - 1 || mGridInfo[info->xInGrid][info->yInGrid + 1] != nullptr){
+			return true;
 		}
 	}
+	return false;
+}
+
+bool TetrisGameAreaLayer::onBlockReachBottom()
+{
+	bool dead = checkIsBottom();
 	if (dead) {
 		for (auto info : mActiveSprites){
 			int xx = info->xInGrid;

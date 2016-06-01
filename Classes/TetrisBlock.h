@@ -42,6 +42,10 @@ public:
 	inline void moveDown() {
 		mPosInGrid.second++;
 	}
+	inline void moveUp() {
+		mPosInGrid.second--;
+
+	}
 	inline std::pair<int, int> getPosInGrid(){
 		return mPosInGrid;
 	}

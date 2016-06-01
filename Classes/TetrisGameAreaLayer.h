@@ -32,10 +32,12 @@ private:
 	void drawBlock(TetrisBlock* pBlock, Vector<RefPtr<UnitInfo> >& sprites);
 	void drawAllBlocks();
 	void onBlockAcc();
+	void onBlockAccDone();
 	int getTopGridIndex(int xIndex);
 	void onKeyReleased(EventKeyboard::KeyCode keyCode, Event* unused_event);
 	void onKeyDown(EventKeyboard::KeyCode keyCode, Event* unused_event);
-	bool blockReachBottom();
+	bool checkIsBottom(bool overlapCheck = false);
+	bool onBlockReachBottom();
     void updateBottomBlocks();
 	void drawShadowBlock();
 	void prepareSprite(int blockType, Vector<RefPtr<UnitInfo> >& sprites);
